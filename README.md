@@ -9,7 +9,7 @@ Features
 --------
 
 - Watch Free Adult Videos (240p to 1080p)
-- Custom Bookmarks
+- ~~Custom Bookmarks~~ _(soon to come)_
 - Video Search
 - Update from within channel
 
