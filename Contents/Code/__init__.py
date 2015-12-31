@@ -3,7 +3,7 @@
 #                                     ClipHunter Plex Channel                                      #
 #                                                                                                  #
 ####################################################################################################
-#from updater import Updater
+from updater import Updater
 
 TITLE = L('title')
 PREFIX = '/video/cliphunter'
@@ -46,7 +46,8 @@ CHANNEL_OPT = [('rating', 'Best'), ('date', 'Newest'), ('views', 'Most Views')]
 
 ####################################################################################################
 def Start():
-    HTTP.CacheTime = 0
+    #HTTP.CacheTime = 0
+    HTTP.CacheTime = CACHE_1HOUR
 
     ObjectContainer.title1 = TITLE
     ObjectContainer.art = R(ART)
@@ -67,7 +68,7 @@ def MainMenu():
 
     oc = ObjectContainer(title2=TITLE, no_cache=True)
 
-    #Updater(PREFIX + '/updater', oc)
+    Updater(PREFIX + '/updater', oc)
 
     oc.add(DirectoryObject(
         key=Callback(HDOpt, title='Explore', href='/categories/All'),

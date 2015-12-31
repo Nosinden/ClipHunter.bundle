@@ -24,4 +24,6 @@ How To Install
 ChangeLog
 ---------
 
+**1.0.1** - 12/31/15 - Added Updater
+
 **1.0.0** - 12/31/15 - First push of local code to GitHub
