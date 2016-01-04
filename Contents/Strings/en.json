@@ -1,5 +1,6 @@
 {
-  "title": "ClipHunter",
+  "ch_title": "ClipHunter",
+  "ph_title": "PicHunter",
 
   "updater.success": "Success",
   "updater.error": "Error",
