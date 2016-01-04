@@ -48,7 +48,7 @@ class Updater:
     info = None
     update = None
 
-    def __init__(self, prefix, oc):
+    def __init__(self, prefix, oc, icon):
 
         if self.InitBundleInfo() and self.IsUpdateAvailable():
             Route.Connect(prefix, self.DoUpdate)
@@ -61,7 +61,7 @@ class Updater:
                 summary=u'%s\n%s' % (L(
                     'updater.install'
                 ), self.update['info']),
-                thumb=R('icon-update.png')
+                thumb=R(icon)
             ))
 
     def NormalizeVersion(self, version):
