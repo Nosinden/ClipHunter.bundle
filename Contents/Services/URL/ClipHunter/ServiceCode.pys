@@ -22,19 +22,28 @@ def MetadataObjectForURL(url):
     html = HTML.ElementFromURL(url)
 
     title = html.xpath('//meta[@name="twitter:description"]')[0].get('content').strip()
+    for node in html.xpath('//script'):
+        node_text = node.text_content()
+        if 'mediaTitle' in node_text:
+            title = Regex('var\ mediaTitle\ =\ (.+?);').search(node_text).group(1).lstrip('\'\"').rstrip('\'\"')
+            break
+
     summary = html.xpath('//meta[@name="description"]')[0].get('content').split(' - porn videos at')[0].strip()
 
     dur_reg = Regex('Length:\ (\d+)\:(\d+)\ \-').search(summary)
     duration = (int(dur_reg.group(1)) * 60000) + (int(dur_reg.group(2)) * 1000)
 
     thumb = html.xpath('//meta[@name="twitter:image"]')[0].get('content').strip()
+    timestamp = int(Datetime.TimestampFromDatetime(Datetime.Now()))
+    art = '/:/plugins/com.plexapp.plugins.cliphunter/resources/art-default-ch.jpg?t=%i' %timestamp
 
     vco = VideoClipObject(
         title=title,
         summary=summary,
         duration=duration,
         content_rating='X',
-        thumb=thumb
+        thumb=thumb,
+        art=art
         )
 
     return vco
