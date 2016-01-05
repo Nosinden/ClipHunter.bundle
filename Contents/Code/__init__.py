@@ -491,7 +491,7 @@ def PornstarCHSimilar(title, href):
             name = node2.text
             oc.add(DirectoryObject(
                 key=Callback(PornstarCH, title='%s / %s' %(title.rsplit('/', 2)[0], name), href=phref),
-                title=name, thumb=))
+                title=name))
     return oc
 
 ####################################################################################################
