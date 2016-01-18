@@ -43,9 +43,6 @@ ICON_UPDATE_PH = 'icon-update-ph.png'
 ART_PH = 'art-default-ph.jpg'
 bm_ph = bookmarks.Bookmark(PH_TITLE, PH_PREFIX, ICON_BM_ADD_PH, ICON_BM_REMOVE_PH)
 
-#CACHE_TIME = CACHE_1HOUR
-CACHE_TIME = 0
-
 #/page/sort/all/rating/uploaded/duration/hd
 SORT = [
     ('date', 'Date'), ('rel', 'Relevance'), ('views', 'Views'), ('rating', 'Rating')
@@ -69,8 +66,8 @@ CHANNEL_OPT = [('rating', 'Best'), ('date', 'Newest'), ('views', 'Most Views')]
 
 ####################################################################################################
 def Start():
-    HTTP.CacheTime = 0
-    #HTTP.CacheTime = CACHE_1HOUR
+    #HTTP.CacheTime = 0
+    HTTP.CacheTime = CACHE_1HOUR
 
     #ValidatePrefs()
 
