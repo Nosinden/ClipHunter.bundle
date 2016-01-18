@@ -77,12 +77,8 @@ def MediaObjectsForURL(url):
                 fmt_list.append((height, bitrate, fmt, String.Encode(video_url)))
             break
 
-    #for (h, f, b, u) in reversed(sorted(fmt_list, key=lambda tup: tup[2])):
     for (h, b, f, u) in reversed(sorted(fmt_list)):
-        Log.Debug('* format = %s' %f)
         f_lower = f.lower()
-        video_codec = None
-        audio_codec = None
 
         if 'flv' in f_lower:
             container = Container.FLV
@@ -120,11 +116,10 @@ def decode_video_url(s):
 def PlayVideo(url, height, **kwargs):
     """Format the video url depending of version"""
 
-
     video_url = decode_video_url(String.Decode(url))
-
+    Log.Debug('*' * 80)
     Log.Debug('* PlayVideo url = %s' %video_url)
-
+    Log.Debug('*' * 80)
     if not video_url:
         raise Ex.MediaNotAvailable
     else:
