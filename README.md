@@ -10,7 +10,7 @@ Features
 
 - Watch Free Adult Videos (240p to 1080p)
 - View Adult Photos
-- ~~Custom Bookmarks~~ _(soon to come)_
+- Custom Bookmarks
 - Video/Photo Search
 - Update from within channel
 
@@ -25,7 +25,9 @@ How To Install
 ChangeLog
 ---------
 
-**1.0.2** - 01/04/15 - Integrated PicHunter. Added similar adult models list to cliphunter.
+**1.0.3** - 01/18/16 - Added Bookmarks.
+
+**1.0.2** - 01/04/16 - Integrated PicHunter. Added similar adult models list to cliphunter.
 
 **1.0.1** - 12/31/15 - Added Updater
 
