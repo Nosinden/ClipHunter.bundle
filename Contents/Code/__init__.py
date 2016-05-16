@@ -715,7 +715,40 @@ def ClipSearch(query=''):
     href = '/search/%s' %String.Quote(query.strip(), usePlus=True)
     title = 'Search / %s' %query
 
-    return HDOpt(title, href)
+    oc = ObjectContainer(title2=title, art=R(ART_CH))
+    data = JSON.ObjectFromURL(CH_BASE_URL + '/a/autocomplete?type=model&txt=%s' %String.Quote(query.strip(), usePlus=False))
+    if len(data) > 0:
+        oc.add(DirectoryObject(
+            key=Callback(CHPSearch, query=query.strip(), data=data),
+            title='Pornstars', thumb=R(ICON_PSTARS_CH), art=R(ART_CH)
+            ))
+        oc.add(DirectoryObject(
+            key=Callback(HDOpt, title=title, href=href),
+            title='Videos', thumb=R(ICON_VIDEO), art=R(ART_CH)
+            ))
+        return oc
+    else:
+        return HDOpt(title, href)
+
+####################################################################################################
+@route(CH_PREFIX + '/pornstar/search', data=list)
+def CHPSearch(query, data):
+
+    if len(data) == 1:
+        t = data[0]
+        h = '/pornstars/%s' %String.Quote(t, usePlus=True)
+        thumb = HTTP.Request('http://www.cliphunter.com/a/modelthumb?name=%s' %String.Quote(t, usePlus=True)).content
+        return PornstarCH(t, h, thumb)
+    else:
+        oc = ObjectContainer(title2='Search / %s' %query, art=R(ART_CH))
+        for d in data:
+            h = '/pornstars/%s' %String.Quote(d, usePlus=True)
+            thumb = HTTP.Request(CH_BASE_URL + '/a/modelthumb?name=%s' %String.Quote(d, usePlus=True)).content
+            oc.add(DirectoryObject(
+                key=Callback(PornstarCH, title=d, href=h, thumb=thumb), title=d,
+                thumb=thumb, art=R(ART_CH)
+                ))
+        return oc
 
 ####################################################################################################
 @route(PH_PREFIX + '/search')
@@ -1036,6 +1069,20 @@ def PhotoBin(title, href):
     return oc
 
 ####################################################################################################
+@route(CH_PREFIX + '/video/thumbs/bin')
+def CHPhotoBin(title, thumb, url):
+    """Create PhotoAlbum for photos in href"""
+
+    oc = ObjectContainer(title2=title, art=R(ART_CH))
+    page = HTTP.Request(url).content
+    re_count = Regex(r'var\ mov\_thumbs\ \=\ (\d+?)\;').search(page)
+    count = int(re_count.group(1)) if re_count else 30
+    it = Regex(r'(.*)\_(\d+)(.*)').search(thumb)
+    for i in xrange(count):
+        oc.add(CreatePhotoObject(title=str(i+1), url=it.group(1)+'_%i' %(i+1)+it.group(3)))
+    return oc
+
+####################################################################################################
 @route(CH_PREFIX + '/videopage', video_info=dict)
 def VideoPage(video_info):
     """
@@ -1068,11 +1115,34 @@ def VideoPage(video_info):
             url=video_info['url']
             ))
 
+        oc.add(PhotoAlbumObject(
+            key=Callback(CHPhotoBin, title=video_info['title'], thumb=video_info['thumb'], url=video_info['url']),
+            rating_key = video_info['url']+'/thumbs', source_title='ClipHunter',
+            title='Video Thumbs', thumb=R(ICON_PHOTOALBUM), art=R(ART_CH)
+            ))
+
         related_thumb = html.xpath('//li[@itemtype]/a[@class="t"]/img/@src')[0]
         oc.add(DirectoryObject(
             key=Callback(DirectoryList, title='Related', href=video_info['url'].split(CH_BASE_URL)[1], page=1),
-            title='Related', thumb=related_thumb, art=R(ART_CH)
+            title='Related Videos', thumb=related_thumb, art=R(ART_CH)
             ))
+        mdl = html.xpath('//a[@class="materialButton mdl ps-popover"]')
+        if mdl:
+            p_name = mdl[0].text_content().strip()
+            p_href = mdl[0].get('href').rsplit('/', 1)[0].replace(' ', '+')
+            p_img = HTTP.Request(CH_BASE_URL + '/a/modelthumb?name=%s' %String.Quote(p_name, usePlus=True)).content
+            oc.add(DirectoryObject(
+                key=Callback(PornstarCH, title=p_name, href=p_href, thumb=p_img),
+                title=p_name, thumb=p_img, art=R(ART_CH)
+                ))
+        chnl = html.xpath('//a[@class="materialButton chnl"]')
+        if chnl:
+            chnl_title = chnl[0].text_content().strip()
+            chnl_href = chnl[0].get('href').replace(' ', '+')
+            oc.add(DirectoryObject(
+                key=Callback(HDOpt, title='Channels / '+chnl_title, href=chnl_href),
+                title=chnl_title, thumb=R(ICON_TV), art=R(ART_CH)
+                ))
 
     bm_ch.add_remove_bookmark(
         oc=oc, title=video_info['title'], thumb=video_info['thumb'], url=video_info['url'],
