@@ -168,15 +168,16 @@ def CategoryList(title):
     url = CH_BASE_URL + '/categories/'
     html = HTML.ElementFromURL(url)
     cat_list = []
-    for node in html.xpath('//div[@class="list-group"]/a'):
+    for node in html.xpath('//div/a[contains(@href, "categories")]'):
         href = node.get('href').replace(' ', '%20')
         name = node.get('title').strip()
-        if (name != 'All') and ((name, href) not in cat_list):
-            cat_list.append((name, href))
-    for (n, h) in sorted(cat_list):
+        img = node.xpath('./img/@src')[0]
+        if (name != 'All') and ((name, href, img) not in cat_list):
+            cat_list.append((name, href, img))
+    for (n, h, i) in sorted(cat_list):
         oc.add(DirectoryObject(
             key=Callback(HDOpt, title='Category / %s' %n, href=h),
-            title=n, art=R(ART_CH)
+            title=n, thumb=i, art=R(ART_CH)
             ))
     return oc
 
@@ -188,7 +189,7 @@ def TagsList(title, href):
     oc = ObjectContainer(title2=title, art=R(ART_PH))
     html = HTML.ElementFromURL(PH_BASE_URL + href)
     tag_list = []
-    for node in html.xpath('//div[@class="list-group"]/a'):
+    for node in html.xpath('//div/a[contains(@href, "tags")]'):
         phref = node.get('href').replace(' ', '%20')
         name = node.get('title').strip()
         if (name != 'All') and ((name, phref) not in tag_list):
