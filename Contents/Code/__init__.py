@@ -612,12 +612,13 @@ def PornstarPH(title, href, thumb):
     oc = ObjectContainer(title2=title, header=header, message=message, art=R(ART_PH), no_cache=True)
 
     if ps_exist:
-        oc.add(DirectoryObject(
-            key=Callback(HDOpt,
-                title='%s / Videos' %title,
-                href='%s/movies' %href.replace('_', '+').replace('models', 'pornstars')),
-            title='Videos', thumb=R(ICON_VIDEO), art=R(ART_CH)
-            ))
+        chpstar_href = '%s/movies' %href.replace('_', '+').replace('models', 'pornstars')
+        chpstar_page = HTTP.Request(CH_BASE_URL + chpstar_href).content
+        if not Regex(r'Not enough results matched your filters').search(chpstar_page):
+            oc.add(DirectoryObject(
+                key=Callback(HDOpt, title='%s / Videos' %title, href=chpstar_href),
+                title='Videos', thumb=R(ICON_VIDEO), art=R(ART_CH)
+                ))
         oc.add(DirectoryObject(
             key=Callback(PhotoAlbumList, title=title, href='%s/photos' %href),
             title='Photos', thumb=R(ICON_PHOTO), art=R(ART_PH)
@@ -710,7 +711,11 @@ def PhotoAlbumList(title, href):
             key=Callback(PhotoAlbumList, title=title, href=nextpg),
             title='Next Page>>', art=R(ART_PH)
             ))
-    return oc
+    if len(oc) > 0:
+        return oc
+    else:
+        ntitle = title.split('/')[-2].strip()
+        return bm_ph.message_container('Photo Album list', '%s Photo Album list Empty' %ntitle)
 
 ####################################################################################################
 @route(CH_PREFIX + '/search')

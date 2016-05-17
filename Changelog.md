@@ -5,6 +5,7 @@ ChangeLog
 - _05/17/2016_
   - Fixes:
     - ClipHunter categories and PicHunter tags, site changed how they were listed
+    - Error handling for models with empty photo ablums or videos
   - Updates:
     - Improved Search function, allows for adult star searching
     - Added [DumbTools](https://github.com/coryo/DumbTools-for-Plex) for _Dumb_ clients
