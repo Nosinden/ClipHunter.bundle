@@ -1,6 +1,16 @@
 ChangeLog
 =========
 
+##### 1.0.5
+- _05/17/2016_
+  - Fixes:
+    - ClipHunter categories and PicHunter tags, site changed how they were listed
+  - Updates:
+    - Improved Search function, allows for adult star searching
+    - Added [DumbTools](https://github.com/coryo/DumbTools-for-Plex) for _Dumb_ clients
+    - Added Adult star, video thumbs, and channel info to video page
+    - Added Adult star(s), related galleries, and studio info to photo album page
+
 ##### 1.0.4
 - _05/15/2016_
   - Fixed Bookmark class error, was only allowing for one bookmark to be added

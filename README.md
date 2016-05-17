@@ -8,9 +8,9 @@ This is a plugin that creates a new channel in [Plex Media Server](https://plex.
 ## Features
 
 - Watch Free Adult Videos (240p to 1080p)
-- View Adult Photos
+- View Adult Photo Albums
 - Custom Bookmarks
-- Video/Photo Search
+- Video/Photo/Model Search
 - Update from within channel
 
 ## How To Install
