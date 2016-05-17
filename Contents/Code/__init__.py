@@ -106,7 +106,7 @@ def VideoMainMenu():
         ))
     #oc.add(PrefsObject(title='Preferences'))
     if Client.Product in DumbKeyboard.clients:
-        DumbKeyboard(PREFIX, oc, Search, dktitle='Search', dkthumb=R('icon-search.png'))
+        DumbKeyboard(CH_PREFIX, oc, Search, dktitle='Search', dkthumb=R('icon-search.png'))
     else:
         oc.add(InputDirectoryObject(
             key=Callback(ClipSearch),
@@ -146,7 +146,7 @@ def PhotoMainMenu():
         ))
     #oc.add(PrefsObject(title='Preferences'))
     if Client.Product in DumbKeyboard.clients:
-        DumbKeyboard(PREFIX, oc, Search, dktitle='Search', dkthumb=R('icon-search.png'))
+        DumbKeyboard(PH_PREFIX, oc, Search, dktitle='Search', dkthumb=R('icon-search.png'))
     else:
         oc.add(InputDirectoryObject(
             key=Callback(PicSearch),
