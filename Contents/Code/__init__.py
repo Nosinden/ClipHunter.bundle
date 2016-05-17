@@ -3,8 +3,9 @@
 #                               (Clip/Pic)Hunter Plex Channel                                      #
 #                                                                                                  #
 ####################################################################################################
-from updater import Updater
 import bookmarks
+from updater import Updater
+from DumbTools import DumbKeyboard
 
 # ClipHunter
 CH_TITLE = L('ch_title')
@@ -69,8 +70,6 @@ def Start():
     #HTTP.CacheTime = 0
     HTTP.CacheTime = CACHE_1HOUR
 
-    #ValidatePrefs()
-
 ####################################################################################################
 @handler(CH_PREFIX, CH_TITLE, thumb=ICON_CH, art=ART_CH)
 def VideoMainMenu():
@@ -106,11 +105,14 @@ def VideoMainMenu():
         title='My Bookmarks', thumb=R(ICON_BM_CH), art=R(ART_CH)
         ))
     #oc.add(PrefsObject(title='Preferences'))
-    oc.add(InputDirectoryObject(
-        key=Callback(ClipSearch),
-        title='Search', summary='Search ClipHunter', prompt='Search for...',
-        thumb=R('icon-search.png'), art=R(ART_CH)
-        ))
+    if Client.Product in DumbKeyboard.clients:
+        DumbKeyboard(PREFIX, oc, Search, dktitle='Search', dkthumb=R('icon-search.png'))
+    else:
+        oc.add(InputDirectoryObject(
+            key=Callback(ClipSearch),
+            title='Search', summary='Search ClipHunter', prompt='Search for...',
+            thumb=R('icon-search.png'), art=R(ART_CH)
+            ))
 
     return oc
 
@@ -143,11 +145,14 @@ def PhotoMainMenu():
         title='My Bookmarks', thumb=R(ICON_BM_PH), art=R(ART_PH)
         ))
     #oc.add(PrefsObject(title='Preferences'))
-    oc.add(InputDirectoryObject(
-        key=Callback(PicSearch),
-        title='Search', summary='Search PicHunter', prompt='Search for...',
-        thumb=R('icon-search.png'), art=R(ART_PH)
-        ))
+    if Client.Product in DumbKeyboard.clients:
+        DumbKeyboard(PREFIX, oc, Search, dktitle='Search', dkthumb=R('icon-search.png'))
+    else:
+        oc.add(InputDirectoryObject(
+            key=Callback(PicSearch),
+            title='Search', summary='Search PicHunter', prompt='Search for...',
+            thumb=R('icon-search.png'), art=R(ART_PH)
+            ))
 
     return oc
 
@@ -737,7 +742,7 @@ def CHPSearch(query, data):
     if len(data) == 1:
         t = data[0]
         h = '/pornstars/%s' %String.Quote(t, usePlus=True)
-        thumb = HTTP.Request('http://www.cliphunter.com/a/modelthumb?name=%s' %String.Quote(t, usePlus=True)).content
+        thumb = HTTP.Request(CH_BASE_URL + '/a/modelthumb?name=%s' %String.Quote(t, usePlus=True)).content
         return PornstarCH(t, h, thumb)
     else:
         oc = ObjectContainer(title2='Search / %s' %query, art=R(ART_CH))
@@ -758,7 +763,40 @@ def PicSearch(query=''):
     href = '/search/%s/1' %String.Quote(query.strip(), usePlus=True)
     title = 'Search / %s' %query
 
-    return PicSortBy(title, href)
+    oc = ObjectContainer(title2=title, art=R(ART_PH))
+    data = JSON.ObjectFromURL(PH_BASE_URL + '/a/autocomplete?type=model&txt=%s' %String.Quote(query.strip(), usePlus=False))
+    if len(data) > 0:
+        oc.add(DirectoryObject(
+            key=Callback(PHPSearch, query=query.strip(), data=data),
+            title='Pornstars', thumb=R(ICON_PSTARS_PH), art=R(ART_PH)
+            ))
+        oc.add(DirectoryObject(
+            key=Callback(PicSortBy, title=title, href=href),
+            title='Videos', thumb=R(ICON_PHOTO), art=R(ART_PH)
+            ))
+        return oc
+    else:
+        return PicSortBy(title, href)
+
+####################################################################################################
+@route(PH_PREFIX + '/pornstar/search', data=list)
+def PHPSearch(query, data):
+
+    if len(data) == 1:
+        t = data[0]
+        h = '/models/%s' %String.Quote(t, usePlus=True)
+        thumb = HTTP.Request(CH_BASE_URL + '/a/modelthumb?name=%s' %String.Quote(t, usePlus=True)).content
+        return PornstarPH(t, h, thumb)
+    else:
+        oc = ObjectContainer(title2='Search / %s' %query, art=R(ART_PH))
+        for d in data:
+            h = '/models/%s' %String.Quote(d, usePlus=True)
+            thumb = HTTP.Request(CH_BASE_URL + '/a/modelthumb?name=%s' %String.Quote(d, usePlus=True)).content
+            oc.add(DirectoryObject(
+                key=Callback(PornstarPH, title=d, href=h, thumb=thumb), title=d,
+                thumb=thumb, art=R(ART_PH)
+                ))
+        return oc
 
 ####################################################################################################
 @route(PH_PREFIX + '/search/sortby')
@@ -1048,11 +1086,55 @@ def PhotoAlbumOpt(title, thumb, href):
             rating_key = PH_BASE_URL + href, source_title='PicHunter', title=name, thumb=thumb,
             art=R(ART_PH)
             ))
+        oc.add(DirectoryObject(
+            key=Callback(PhotoAlbumList, title='Related Galleries', href=href),
+            title='Related Galleries', thumb=pichunter_list(html)[0][1], art=R(ART_PH)
+            ))
+        gstar = html.xpath('//a[@class="g_star r"]')
+        if gstar:
+            if len(gstar) == 1:
+                gstar_href = gstar[0].get('href')
+                gstar_title = gstar[0].text.strip()
+                gstar_thumb = HTTP.Request(CH_BASE_URL + '/a/modelthumb?name=%s' %String.Quote(gstar_title, usePlus=True)).content
+                oc.add(DirectoryObject(
+                    key=Callback(PornstarPH, title=gstar_title, href=gstar_href, thumb=gstar_thumb),
+                    title=gstar_title, thumb=gstar_thumb, art=R(ART_PH)
+                    ))
+            else:
+                pstar_list = []
+                for p in gstar:
+                    gstar_href = p.get('href')
+                    gstar_title = p.text.strip()
+                    pstar_list.append((gstar_title, gstar_href))
+                oc.add(DirectoryObject(
+                    key=Callback(PornstarPHF, pstar_list=pstar_list),
+                    title='Featured Pornstars', thumb=R(ICON_PSTARS_PH), art=R(ART_PH)
+                    ))
+        gsite = html.xpath('//a[@class="g_site"]')
+        if gsite:
+            gsite_href = gsite[0].get('href')
+            gsite_title = gsite[0].text.strip()
+            oc.add(DirectoryObject(
+                key=Callback(Studio, title=gsite_title, href=gsite_href),
+                title=gsite_title, thumb=R(ICON_STUDIO), art=R(ART_PH)
+                ))
 
     bm_ph.add_remove_bookmark(
         oc=oc, title=name, thumb=thumb, url=href, item_id=bm_id,
         category='PhotoAlbum', duration=None, tagline=None
         )
+    return oc
+
+####################################################################################################
+@route(PH_PREFIX + '/pornstar/featured', pstar_list=list)
+def PornstarPHF(pstar_list):
+    oc = ObjectContainer(title2='Featured Pornstars', art=R(ART_PH))
+    for n, h in pstar_list:
+        thumb = HTTP.Request(CH_BASE_URL + '/a/modelthumb?name=%s' %String.Quote(n, usePlus=True)).content
+        oc.add(DirectoryObject(
+            key=Callback(PornstarPH, title=n, href=h, thumb=thumb),
+            title=n, thumb=thumb, art=R(ART_PH)
+            ))
     return oc
 
 ####################################################################################################
