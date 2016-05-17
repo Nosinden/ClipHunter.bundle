@@ -235,6 +235,10 @@ def HDOpt(title, href):
     """
 
     oc = ObjectContainer(title2=title, art=R(ART_CH))
+    oc.add(DirectoryObject(
+        key=Callback(DirectoryList, title='%s / Default' %title, href=href, page=1),
+        title='Default (Site Default List)', art=R(ART_CH)
+        ))
     if 'Channels' in title:
         oc.add(DirectoryObject(
             key=Callback(ChannelOpt, title='%s / All' %title, href=href, hd=0),

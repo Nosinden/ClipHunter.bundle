@@ -8,9 +8,11 @@ ChangeLog
     - Error handling for models with empty photo ablums or videos
   - Updates:
     - Improved Search function, allows for adult star searching
+    - Added a default option for Video list, that way can avoid all the options (may make into a prefs later)
     - Added [DumbTools](https://github.com/coryo/DumbTools-for-Plex) for _Dumb_ clients
     - Added Adult star, video thumbs, and channel info to video page
     - Added Adult star(s), related galleries, and studio info to photo album page
+    - Added _Worked for these studios_, _People also like_, and _She worked with_ list to PicHunter Adult star page
 
 ##### 1.0.4
 - _05/15/2016_
