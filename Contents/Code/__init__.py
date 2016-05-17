@@ -593,16 +593,17 @@ def PicPornstarList(title, href):
 def PornstarPH(title, href, thumb):
     """Videos, Photos"""
 
-    html = HTML.ElementFromURL(PH_BASE_URL + href)
+    req = HTTP.Request(PH_BASE_URL + href + '/info')
+    html = HTML.ElementFromString(req.content)
 
     bm_title = title.split('/')[-1].strip()
     bm_id = bm_title.lower().replace(' ', '_')
-    ps_exist = html.xpath('//link[@rel="canonical"]')
+    ps_removed = Regex(r'Pornstar Not Found').search(req.content)
     match = bm_ph.bookmark_exist(item_id=bm_id, category='PicPornstar')
     header = None
     message = None
 
-    if not ps_exist:
+    if ps_removed:
         if match:
             header = title
             message = 'Pornstar Removed from site'
@@ -611,7 +612,7 @@ def PornstarPH(title, href, thumb):
 
     oc = ObjectContainer(title2=title, header=header, message=message, art=R(ART_PH), no_cache=True)
 
-    if ps_exist:
+    if not ps_removed:
         chpstar_href = '%s/movies' %href.replace('_', '+').replace('models', 'pornstars')
         chpstar_page = HTTP.Request(CH_BASE_URL + chpstar_href).content
         if not Regex(r'Not enough results matched your filters').search(chpstar_page):
@@ -623,6 +624,24 @@ def PornstarPH(title, href, thumb):
             key=Callback(PhotoAlbumList, title=title, href='%s/photos' %href),
             title='Photos', thumb=R(ICON_PHOTO), art=R(ART_PH)
             ))
+        wfts = html.xpath('//b[starts-with(text(), "Worked for these Studios")]')
+        if wfts:
+            oc.add(DirectoryObject(
+                key=Callback(PornstarPHR, title='Worked for these Studios', href=href+'/info'),
+                title='Worked for these Studios', thumb=R(ICON_STUDIO), art=R(ART_PH)
+                ))
+        pal = html.xpath('//b[starts-with(text(), "People also like")]')
+        if pal:
+            oc.add(DirectoryObject(
+                key=Callback(PornstarPHR, title='People also like', href=href+'/info'),
+                title='People also like', thumb=R(ICON_PSTARS_PH), art=R(ART_PH)
+                ))
+        sww = html.xpath('//b[starts-with(text(), "She worked with")]')
+        if sww:
+            oc.add(DirectoryObject(
+                key=Callback(PornstarPHR, title='She worked with', href=href+'/info'),
+                title='She worked with', thumb=R(ICON_PSTARS_PH), art=R(ART_PH)
+                ))
 
     if not thumb:
         html = HTML.ElementFromURL(CH_BASE_URL + href)
@@ -632,6 +651,33 @@ def PornstarPH(title, href, thumb):
         category='PicPornstar', duration=None, tagline=None
         )
 
+    return oc
+
+####################################################################################################
+@route(PH_PREFIX + '/pornstar/related')
+def PornstarPHR(title, href):
+    """list related pornstars"""
+
+    oc = ObjectContainer(title2=title, art=R(ART_PH))
+    html = HTML.ElementFromURL(PH_BASE_URL + href)
+    rhtml = html.xpath('//b[starts-with(text(), "%s")]' %title)[0]
+    if title == "Worked for these Studios":
+        slist = rhtml.getparent().getparent().getnext().xpath('./div[@class="list-group"]/a')
+        for g in slist:
+            stitle = g.get('title')
+            shref = g.get('href')
+            oc.add(DirectoryObject(
+                key=Callback(Studio, title=stitle, href=shref),
+                title=stitle, thumb=R(ICON_STUDIO), art=R(ART_PH)
+                ))
+    else:
+        nhtml = rhtml.getparent().getparent().getnext().xpath('./div[@class="thumbtable"]')[0]
+        for (n, t, h) in pichunter_list(nhtml, relative=True):
+            oc.add(DirectoryObject(
+                key=Callback(PornstarPH, title='%s / %s' %(title, n), href=h, thumb=t),
+                title=n, thumb=Resource.ContentsOfURLWithFallback(t, 'icon-babe-miss.png'),
+                art=R(ART_PH)
+                ))
     return oc
 
 ####################################################################################################
@@ -671,7 +717,10 @@ def StudioList(title, href):
             key=Callback(StudioList, title=title, href=nextpg),
             title='Next Page>>', art=R(ART_PH)
             ))
-    return oc
+    if len(oc) > 0:
+        return oc
+    else:
+        return bm_ph.message_container('Studio list', 'Stuido list Empty')
 
 ####################################################################################################
 @route(PH_PREFIX + '/studio')
@@ -1263,9 +1312,9 @@ def abc():
     return map(chr, range(ord('A'), ord('Z')+1))
 
 ####################################################################################################
-def pichunter_list(html):
+def pichunter_list(html, relative=False):
     palist = []
-    for node in html.xpath('//a[@class="thumb"]'):
+    for node in html.xpath('%s//a[@class="thumb"]' %('.' if relative else '')):
         href = node.get('href')
         title = node.xpath('./img/@alt')[0]
         thumb = node.xpath('./img/@src')[0]
