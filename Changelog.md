@@ -5,7 +5,7 @@ ChangeLog
 - _05/17/2016_
   - Fixes:
     - ClipHunter categories and PicHunter tags, site changed how they were listed
-    - Error handling for models with empty photo ablums or videos
+    - Error handling for models with empty photo albums or videos
   - Updates:
     - Improved Search function, allows for adult star searching
     - Added a default option for Video list, that way can avoid all the options (may make into a prefs later)
